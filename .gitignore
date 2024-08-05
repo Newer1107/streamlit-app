@@ -6,3 +6,5 @@ lib
 lib64
 share
 pyvenv.cfg
+mysql
+.venv

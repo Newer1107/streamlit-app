@@ -4,16 +4,16 @@ import mysql.connector
 import hashlib
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
 
-# MySQL Database setup
+
 def create_connection():
     return mysql.connector.connect(
         host='localhost',
-        user='root',
+        user='raunak',
         password='rooor',
         database='student_results'
     )
+
 
 def create_tables():
     conn = create_connection()
@@ -38,6 +38,8 @@ def create_user(username, password):
     try:
         cursor.execute('INSERT INTO teachers (username, password) VALUES (%s, %s)', (username, hashed_password))
         conn.commit()
+        st.success("Account Created Successfully")
+        st.info("Go to Login Menu to login")
     except mysql.connector.Error as err:
         st.error(f"Error: {err}")
     cursor.close()
@@ -151,7 +153,10 @@ def manage_data():
     new_marks = st.text_input("New Student's Marks")
     
     if st.button("Add Student"):
-        add_student(new_roll_number, new_name, new_dob, new_marks)
+        if new_roll_number != "" and new_name != "" and new_dob != "" and new_marks != "":
+            add_student(new_roll_number, new_name, new_dob, new_marks)
+        else:
+            st.error("All fields are required")        
     
     # Updating Data
     st.write("Enter the details to update the database:")
@@ -236,8 +241,6 @@ def main():
         new_password = st.text_input("Password", type='password')
         if st.button("Sign Up"):
             create_user(new_user, new_password)
-            st.success("Account Created Successfully")
-            st.info("Go to Login Menu to login")
 
 if __name__ == '__main__':
     create_tables()
