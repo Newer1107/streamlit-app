@@ -2,14 +2,18 @@ import streamlit as st
 import pandas as pd
 import mysql.connector
 import hashlib
-
+from streamlit_extras.switch_page_button import switch_page
+import st_pages as stp
+from dotenv import load_dotenv
+import os
+load_dotenv()
 # Function to create a connection to the database
 def create_connection():
     return mysql.connector.connect(
-        host='localhost',
-        user='raunak',
-        password='rooor',
-        database='student_results'
+        host=os.getenv('DATABASE_HOST'),
+        user=os.getenv('DATABASE_USER'),
+        password=os.getenv('DATABASE_PASSWORD'),
+        database=os.getenv('DATABASE_NAME')
     )
 
 # Function to create necessary tables
@@ -81,8 +85,8 @@ def view_result(roll_number, dob):
 
 # Main function to run the app
 def main():
+    stp.hide_pages(["manager","test"])
     st.title("Student Results Management System")
-    
     # Initialize session state variables
     if 'logged_in' not in st.session_state:
         st.session_state.logged_in = False
@@ -90,7 +94,6 @@ def main():
         st.session_state.username = ""
     if 'rerun' not in st.session_state:
         st.session_state.rerun = False
-
     menu = ["Home", "Login", "SignUp"]
     choice = st.sidebar.selectbox("Menu", menu)
 
@@ -111,6 +114,7 @@ def main():
                 st.session_state.logged_in = True
                 st.session_state.username = username
                 st.session_state.rerun = True
+                switch_page('manager')
             else:
                 st.error(login_result)
     elif choice == "SignUp":
@@ -118,20 +122,33 @@ def main():
         new_user = st.text_input("Username")
         new_password = st.text_input("Password", type='password')
         if st.button("Sign Up"):
-            create_user(new_user, new_password)
+            if new_user != "" and new_password != "" :
+                create_user(new_user, new_password)
+            else :
+                st.error("All fields are required !!!")
 
     if st.session_state.logged_in:
         st.sidebar.subheader(f"Welcome, {st.session_state.username}")
-        st.sidebar.write("[Go to Database Management](manager.py)")
         if st.sidebar.button("Logout"):
             st.session_state.logged_in = False
             st.session_state.username = ""
             st.success("Logged out successfully")
             st.session_state.rerun = True
+    st.markdown("""
+    <style>
+        .reportview-container {
+            margin-top: -2em;
+        }
+        #MainMenu {visibility: hidden;}
+        .stDeployButton {display:none;}
+        footer {visibility: hidden;}
+        #stDecoration {display:none;}
+    </style>
+    """, unsafe_allow_html=True)
 
-    if st.session_state.rerun:
-        st.session_state.rerun = False
-        st.rerun()
+    # if st.session_state.rerun:
+    #     st.session_state.rerun = False
+    #     st.rerun()
 
 if __name__ == '__main__':
     create_tables()

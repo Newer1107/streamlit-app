@@ -2,14 +2,17 @@ import streamlit as st
 import pandas as pd
 import mysql.connector
 import logging
-
+from streamlit_extras.switch_page_button import switch_page
+from dotenv import load_dotenv
+import os
+load_dotenv()
 # Function to create a connection to the database
 def create_connection():
     return mysql.connector.connect(
-        host='localhost',
-        user='raunak',
-        password='rooor',
-        database='student_results'
+        host=os.getenv('DATABASE_HOST'),
+        user=os.getenv('DATABASE_USER'),
+        password=os.getenv('DATABASE_PASSWORD'),
+        database=os.getenv('DATABASE_NAME')
     )
 
 # Function to upload data
@@ -122,8 +125,8 @@ def delete_from_database(roll_number):
 
 def main():
     st.title("Database Management")
-    
     if 'logged_in' in st.session_state and st.session_state.logged_in:
+        st.sidebar.subheader(f"Welcome, {st.session_state.username}!")
         task = st.sidebar.selectbox("Task", ["Upload Data", "Manage Data"])
         if task == "Upload Data":
             upload_data()
@@ -136,6 +139,18 @@ def main():
             st.rerun()
     else:
         st.error("Please login from the main app")
+        switch_page("test")
+    st.markdown("""
+    <style>
+        .reportview-container {
+            margin-top: -2em;
+        }
+        #MainMenu {visibility: hidden;}
+        .stDeployButton {display:none;}
+        footer {visibility: hidden;}
+        #stDecoration {display:none;}
+    </style>
+    """, unsafe_allow_html=True)
         
 
 if __name__ == '__main__':
